@@ -16,6 +16,12 @@ export interface ReaderProfile {
   is_active: boolean;
 }
 
+interface ReaderNotification {
+  reader_id: string;
+  reader_email: string;
+  reader_name: string;
+}
+
 class ReaderNotificationService {
   /**
    * Get reader's notification preferences
@@ -112,7 +118,7 @@ class ReaderNotificationService {
 
       // Send email to each reader via edge function
       const notifications = await Promise.allSettled(
-        readers?.map(async (reader: any) => {
+        readers?.map(async (reader: ReaderNotification) => {
           try {
             const response = await fetch(
               `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-reader-notification`,
@@ -149,11 +155,11 @@ class ReaderNotificationService {
               success: response.ok,
               error: response.ok ? null : result.error
             };
-          } catch (error: any) {
+          } catch (error: unknown) {
             return {
               readerId: reader.reader_id,
               success: false,
-              error: error.message
+              error: error instanceof Error ? error.message : 'Unknown error'
             };
           }
         }) || []
@@ -168,8 +174,9 @@ class ReaderNotificationService {
         successCount,
         failureCount: (readers?.length || 0) - successCount
       };
-    } catch (error: any) {
-      throw new Error(`Failed to send notifications: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to send notifications: ${errorMessage}`);
     }
   }
 

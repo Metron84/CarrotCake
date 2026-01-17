@@ -254,7 +254,7 @@ export const analyticsService = {
   },
 
   // Get moderation actions timeline
-  async getModerationActionsTimeline(days: number = 30): Promise<any[]> {
+  async getModerationActionsTimeline(days: number = 30): Promise<Array<{ date: string; approve: number; reject: number; edit: number }>> {
     try {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
@@ -268,7 +268,7 @@ export const analyticsService = {
       if (error) throw error;
 
       // Group by date
-      const groupedData: Record<string, any> = {};
+      const groupedData: Record<string, { date: string; approve: number; reject: number; edit: number }> = {};
       
       data?.forEach((action) => {
         const date = new Date(action.created_at).toLocaleDateString();

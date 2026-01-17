@@ -61,7 +61,7 @@ export interface Database {
           slug: string;
           description: string;
           methodology: string | null;
-          ranking_data: any;
+          ranking_data: Record<string, unknown>;
           category: string;
           status: 'draft' | 'published' | 'archived';
           featured_image: string | null;
@@ -78,7 +78,7 @@ export interface Database {
           slug: string;
           description: string;
           methodology?: string | null;
-          ranking_data: any;
+          ranking_data: Record<string, unknown>;
           category: string;
           status?: 'draft' | 'published' | 'archived';
           featured_image?: string | null;
@@ -95,7 +95,7 @@ export interface Database {
           slug?: string;
           description?: string;
           methodology?: string | null;
-          ranking_data?: any;
+          ranking_data?: Record<string, unknown>;
           category?: string;
           status?: 'draft' | 'published' | 'archived';
           featured_image?: string | null;
@@ -114,7 +114,7 @@ export interface Database {
           slug: string;
           description: string;
           session_format: 'debate' | 'discussion' | 'panel' | 'interview';
-          participants: any;
+          participants: Array<{ name: string; role: string }> | Record<string, unknown>;
           transcript: string | null;
           key_takeaways: string[] | null;
           status: 'draft' | 'published' | 'archived';
@@ -133,7 +133,7 @@ export interface Database {
           slug: string;
           description: string;
           session_format?: 'debate' | 'discussion' | 'panel' | 'interview';
-          participants: any;
+          participants: Array<{ name: string; role: string }> | Record<string, unknown>;
           transcript?: string | null;
           key_takeaways?: string[] | null;
           status?: 'draft' | 'published' | 'archived';
@@ -152,7 +152,7 @@ export interface Database {
           slug?: string;
           description?: string;
           session_format?: 'debate' | 'discussion' | 'panel' | 'interview';
-          participants?: any;
+          participants?: Array<{ name: string; role: string }> | Record<string, unknown>;
           transcript?: string | null;
           key_takeaways?: string[] | null;
           status?: 'draft' | 'published' | 'archived';

@@ -11,9 +11,9 @@ async function generateHash() {
 
   try {
     const hash = await bcrypt?.hash(password, 10);
-    console.log('\nGenerated password hash:');
-    console.log(hash);
-    console.log('\nAdd this to your .env file as ADMIN_PASSWORD_HASH');
+    console.info('\nGenerated password hash:');
+    console.info(hash);
+    console.info('\nAdd this to your .env file as ADMIN_PASSWORD_HASH');
   } catch (error) {
     console.error('Error generating hash:', error);
     process.exit(1);
