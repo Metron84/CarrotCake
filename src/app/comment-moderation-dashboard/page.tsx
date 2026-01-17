@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -22,7 +24,17 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function CommentModerationDashboard() {
-  const { user, loading: authLoading } = useAuth();
+  // Use auth with error boundary for build-time safety
+  let user = null;
+  let authLoading = true;
+  try {
+    const auth = useAuth();
+    user = auth.user;
+    authLoading = auth.loading;
+  } catch {
+    // During build, AuthProvider may not be available
+    authLoading = false;
+  }
   const [comments, setComments] = useState<CommentWithContent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

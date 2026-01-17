@@ -160,7 +160,7 @@ export const analyticsService = {
 
       if (writingsError) throw writingsError;
 
-      const writingsViews = writings?.reduce((sum, w) => sum + (w.view_count || 0), 0) || 0;
+      const writingsViews = (writings || []).reduce((sum, w: { view_count?: number }) => sum + (w.view_count || 0), 0);
       const avgWritingsViews = writings && writings.length > 0 ? writingsViews / writings.length : 0;
 
       viewsData.push({
@@ -177,7 +177,7 @@ export const analyticsService = {
 
       if (roundtablesError) throw roundtablesError;
 
-      const roundtablesViews = roundtables?.reduce((sum, r) => sum + (r.view_count || 0), 0) || 0;
+      const roundtablesViews = (roundtables || []).reduce((sum, r: { view_count?: number }) => sum + (r.view_count || 0), 0);
       const avgRoundtablesViews = roundtables && roundtables.length > 0 ? roundtablesViews / roundtables.length : 0;
 
       viewsData.push({
@@ -194,7 +194,7 @@ export const analyticsService = {
 
       if (rankingsError) throw rankingsError;
 
-      const rankingsViews = rankings?.reduce((sum, r) => sum + (r.view_count || 0), 0) || 0;
+      const rankingsViews = (rankings || []).reduce((sum, r: { view_count?: number }) => sum + (r.view_count || 0), 0);
       const avgRankingsViews = rankings && rankings.length > 0 ? rankingsViews / rankings.length : 0;
 
       viewsData.push({
@@ -211,7 +211,7 @@ export const analyticsService = {
 
       if (mediaError) throw mediaError;
 
-      const mediaViews = media?.reduce((sum, m) => sum + (m.view_count || 0) + (m.play_count || 0), 0) || 0;
+      const mediaViews = (media || []).reduce((sum, m: { view_count?: number; play_count?: number }) => sum + (m.view_count || 0) + (m.play_count || 0), 0);
       const avgMediaViews = media && media.length > 0 ? mediaViews / media.length : 0;
 
       viewsData.push({
@@ -238,7 +238,7 @@ export const analyticsService = {
 
       const commentCounts: Record<string, number> = {};
       
-      data?.forEach((comment) => {
+      data?.forEach((comment: { content_type?: string }) => {
         const type = comment.content_type || 'unknown';
         commentCounts[type] = (commentCounts[type] || 0) + 1;
       });
@@ -270,12 +270,15 @@ export const analyticsService = {
       // Group by date
       const groupedData: Record<string, { date: string; approve: number; reject: number; edit: number }> = {};
       
-      data?.forEach((action) => {
+      data?.forEach((action: { action: string; created_at: string; new_status: string }) => {
         const date = new Date(action.created_at).toLocaleDateString();
         if (!groupedData[date]) {
           groupedData[date] = { date, approve: 0, reject: 0, edit: 0 };
         }
-        groupedData[date][action.action as string] = (groupedData[date][action.action as string] || 0) + 1;
+        const actionKey = action.action as 'approve' | 'reject' | 'edit';
+        if (actionKey === 'approve' || actionKey === 'reject' || actionKey === 'edit') {
+          groupedData[date][actionKey] = (groupedData[date][actionKey] || 0) + 1;
+        }
       });
 
       return Object.values(groupedData);

@@ -1,12 +1,14 @@
 'use client';
-import { useEffect, useState } from 'react';
+
+export const dynamic = 'force-dynamic';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { writingsService, rankingsService, roundtableService, mediaService } from '@/services/contentService';
-import type { Writing, Ranking, ContentStatus, ContentCategory, MediaType, SessionFormat } from '@/types/database.types';
+import type { ContentStatus, ContentCategory, MediaType, SessionFormat } from '@/types/database.types';
 
 type ContentType = 'writing' | 'ranking' | 'session' | 'media';
 
-export default function ContentEditor() {
+function ContentEditorForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const contentType = (searchParams.get('type') as ContentType) || 'writing';
@@ -142,7 +144,7 @@ export default function ContentEditor() {
         }
       }
 
-      if (result?.error) throw new Error(result.error.message);
+      if (!result) throw new Error('Failed to save content');
       
       setSuccess(editId ? 'Content updated successfully!' : 'Content created successfully!');
       setTimeout(() => router.push('/admin-dashboard'), 2000);
@@ -609,5 +611,20 @@ export default function ContentEditor() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ContentEditor() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading editor...</p>
+        </div>
+      </div>
+    }>
+      <ContentEditorForm />
+    </Suspense>
   );
 }

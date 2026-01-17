@@ -1,11 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  productionBrowserSourceMaps: true,
+  // Vercel optimization: Disable source maps in production for faster builds
+  productionBrowserSourceMaps: false,
 
+  // Vercel requires strict type checking
   typescript: {
     ignoreBuildErrors: false,
   },
 
+  // Vercel requires strict linting
   eslint: {
     ignoreDuringBuilds: false,
   },
@@ -31,15 +34,7 @@ const nextConfig = {
     ],
   },
 
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/homepage',
-        permanent: false,
-      },
-    ];
-  }
+  // Removed redirects - using app/page.tsx instead for better Vercel compatibility
 };
 
 export default nextConfig;

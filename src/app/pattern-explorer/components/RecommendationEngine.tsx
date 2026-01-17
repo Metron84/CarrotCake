@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Sparkles, TrendingUp, Link2, Lightbulb } from '@heroicons/react/24/outline';
+import { StarIcon as Sparkles, ArrowTrendingUpIcon as TrendingUp, LinkIcon as Link2, LightBulbIcon as Lightbulb } from '@heroicons/react/24/outline';
 
 interface RecommendationEngineProps {
   contentType: 'writing' | 'ranking' | 'roundtable' | 'media';

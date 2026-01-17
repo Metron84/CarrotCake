@@ -21,6 +21,15 @@ interface ContentItem {
 const PatternExplorerInteractive = () => {
   const [contentItems, setContentItems] = useState<ContentItem[]>([]);
   const [filteredContent, setFilteredContent] = useState<ContentItem[]>([]);
+  const [currentFilters, setCurrentFilters] = useState<{
+    contentTypes: string[];
+    themes: string[];
+    connectionStrength: string;
+  }>({
+    contentTypes: [],
+    themes: [],
+    connectionStrength: 'all',
+  });
   const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -42,14 +51,38 @@ const PatternExplorerInteractive = () => {
       ]);
 
       const allContent: ContentItem[] = [
-        ...(writings.data?.map(w => ({ 
-          ...w, 
-          type: 'writing' as const, 
-          description: w.excerpt 
+        ...(writings.data?.map((w: { id: string; title: string; tags?: string[] | null; category?: string; excerpt?: string | null }) => ({ 
+          id: w.id,
+          title: w.title,
+          type: 'writing' as const,
+          tags: w.tags ?? undefined,
+          category: w.category ?? undefined,
+          description: w.excerpt ?? undefined
         })) || []),
-        ...(rankings.data?.map(r => ({ ...r, type: 'ranking' as const })) || []),
-        ...(roundtables.data?.map(rt => ({ ...rt, type: 'roundtable' as const })) || []),
-        ...(media.data?.map(m => ({ ...m, type: 'media' as const })) || []),
+        ...(rankings.data?.map((r: { id: string; title: string; tags?: string[] | null; category?: string; description?: string | null }) => ({ 
+          id: r.id,
+          title: r.title,
+          type: 'ranking' as const,
+          tags: r.tags ?? undefined,
+          category: r.category ?? undefined,
+          description: r.description ?? undefined
+        })) || []),
+        ...(roundtables.data?.map((rt: { id: string; title: string; tags?: string[] | null; category?: string; description?: string | null }) => ({ 
+          id: rt.id,
+          title: rt.title,
+          type: 'roundtable' as const,
+          tags: rt.tags ?? undefined,
+          category: rt.category ?? undefined,
+          description: rt.description ?? undefined
+        })) || []),
+        ...(media.data?.map((m: { id: string; title: string; tags?: string[] | null; category?: string; description?: string | null }) => ({ 
+          id: m.id,
+          title: m.title,
+          type: 'media' as const,
+          tags: m.tags ?? undefined,
+          category: m.category ?? undefined,
+          description: m.description ?? undefined
+        })) || []),
       ];
 
       setContentItems(allContent);
@@ -128,8 +161,20 @@ const PatternExplorerInteractive = () => {
           {showFilters && (
             <div className="mt-4">
               <FilterPanel
-                contentItems={contentItems}
-                onFilterChange={setFilteredContent}
+                onFilterChange={(filters) => {
+                  setCurrentFilters(filters);
+                  let filtered = contentItems;
+                  if (filters.contentTypes.length > 0) {
+                    filtered = filtered.filter(item => filters.contentTypes.includes(item.type));
+                  }
+                  if (filters.themes.length > 0) {
+                    filtered = filtered.filter(item => 
+                      item.tags?.some(tag => filters.themes.includes(tag)) ||
+                      (item.category && filters.themes.includes(item.category))
+                    );
+                  }
+                  setFilteredContent(filtered);
+                }}
               />
             </div>
           )}
@@ -142,18 +187,14 @@ const PatternExplorerInteractive = () => {
           <div className="lg:col-span-2 space-y-8">
             {/* Network Visualization */}
             <NetworkVisualization
-              contentItems={filteredContent}
-              onNodeClick={handleContentSelect}
+              selectedFilters={currentFilters}
             />
 
             {/* Tag Cloud */}
-            <TagCloud contentItems={filteredContent} />
+            <TagCloud />
 
             {/* Export Options */}
-            <ExportPanel
-              contentItems={filteredContent}
-              selectedContent={selectedContent}
-            />
+            <ExportPanel />
           </div>
 
           {/* Right Column: Recommendations */}

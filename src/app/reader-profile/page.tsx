@@ -45,8 +45,8 @@ export default function ReaderProfilePage() {
 
       setUser(user);
       await loadProfileData(user.id);
-    } catch (error: any) {
-      setMessage({ type: 'error', text: error.message });
+    } catch (error: unknown) {
+      setMessage({ type: 'error', text: error instanceof Error ? error.message : 'An error occurred' });
     } finally {
       setLoading(false);
     }
@@ -61,8 +61,8 @@ export default function ReaderProfilePage() {
 
       setProfile(profileData);
       setPreferences(preferencesData);
-    } catch (error: any) {
-      setMessage({ type: 'error', text: `Failed to load profile: ${error.message}` });
+    } catch (error: unknown) {
+      setMessage({ type: 'error', text: `Failed to load profile: ${error instanceof Error ? error.message : 'Unknown error'}` });
     }
   };
 
@@ -82,8 +82,8 @@ export default function ReaderProfilePage() {
       await readerNotificationService.updateReaderProfile(user.id, updates);
       setProfile({ ...profile, ...updates });
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
-    } catch (error: any) {
-      setMessage({ type: 'error', text: error.message });
+    } catch (error: unknown) {
+      setMessage({ type: 'error', text: error instanceof Error ? error.message : 'An error occurred' });
     } finally {
       setSaving(false);
     }
@@ -101,16 +101,16 @@ export default function ReaderProfilePage() {
       const contentTypes = formData.getAll('content_types') as string[];
 
       const updates = {
-        new_content_frequency: formData.get('new_content_frequency') as any,
-        comment_reply_frequency: formData.get('comment_reply_frequency') as any,
-        content_types: contentTypes.length > 0 ? contentTypes : ['all']
+        new_content_frequency: (formData.get('new_content_frequency') as 'instant' | 'daily' | 'weekly' | 'never') || 'never',
+        comment_reply_frequency: (formData.get('comment_reply_frequency') as 'instant' | 'daily' | 'weekly' | 'never') || 'never',
+        content_types: (contentTypes.length > 0 ? contentTypes : ['all']) as ('all' | 'writings' | 'rankings' | 'roundtables' | 'media')[]
       };
 
       await readerNotificationService.updateNotificationPreferences(user.id, updates);
       setPreferences({ ...preferences, ...updates });
       setMessage({ type: 'success', text: 'Notification preferences updated!' });
-    } catch (error: any) {
-      setMessage({ type: 'error', text: error.message });
+    } catch (error: unknown) {
+      setMessage({ type: 'error', text: error instanceof Error ? error.message : 'An error occurred' });
     } finally {
       setSaving(false);
     }

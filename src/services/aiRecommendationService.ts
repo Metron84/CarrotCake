@@ -40,40 +40,7 @@ export async function generateContentRecommendations(
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.5-flash',
       generationConfig: {
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: 'object',
-          properties: {
-            recommendations: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  contentId: { type: 'string' },
-                  contentTitle: { type: 'string' },
-                  contentType: { type: 'string' },
-                  connectionStrength: { type: 'number' },
-                  connectionReason: { type: 'string' },
-                  sharedThemes: {
-                    type: 'array',
-                    items: { type: 'string' }
-                  }
-                },
-                required: ['contentId', 'contentTitle', 'contentType', 'connectionStrength', 'connectionReason', 'sharedThemes']
-              }
-            },
-            overarchingThemes: {
-              type: 'array',
-              items: { type: 'string' }
-            },
-            suggestedTags: {
-              type: 'array',
-              items: { type: 'string' }
-            },
-            contentSummary: { type: 'string' }
-          },
-          required: ['recommendations', 'overarchingThemes', 'suggestedTags', 'contentSummary']
-        }
+        responseMimeType: 'application/json'
       }
     });
 
@@ -90,11 +57,11 @@ Current Content:
 Available Content for Recommendations (${request.availableContent.length} items):
 ${request.availableContent.map((item: ContentItem, idx: number) => `
 ${idx + 1}. ID: ${item.id}
-   Type: ${item.content_type}
+   Type: ${(item as any).content_type || 'unknown'}
    Title: ${item.title}
-   Description: ${item.description || 'N/A'}
-   Tags: ${item.tags?.join(', ') || 'None'}
-   Category: ${item.category || 'N/A'}
+   Description: ${(item as any).description || (item as any).excerpt || 'N/A'}
+   Tags: ${(item as any).tags?.join(', ') || 'None'}
+   Category: ${(item as any).category || 'N/A'}
 `).join('\n')}
 
 Analyze the current content and identify the top 5-7 most thematically connected pieces from the available content. For each recommendation:
@@ -159,32 +126,7 @@ export async function analyzeContentPatterns(
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.5-flash',
       generationConfig: {
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: 'object',
-          properties: {
-            commonThemes: {
-              type: 'array',
-              items: { type: 'string' }
-            },
-            contentClusters: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  theme: { type: 'string' },
-                  contentIds: {
-                    type: 'array',
-                    items: { type: 'string' }
-                  }
-                },
-                required: ['theme', 'contentIds']
-              }
-            },
-            insights: { type: 'string' }
-          },
-          required: ['commonThemes', 'contentClusters', 'insights']
-        }
+        responseMimeType: 'application/json'
       }
     });
 
@@ -193,11 +135,11 @@ Analyze the following content collection and identify patterns, themes, and clus
 
 ${contents.map((item: ContentItem, idx: number) => `
 ${idx + 1}. ID: ${item.id}
-   Type: ${item.content_type}
+   Type: ${(item as any).content_type || 'unknown'}
    Title: ${item.title}
-   Description: ${item.description || 'N/A'}
-   Tags: ${item.tags?.join(', ') || 'None'}
-   Category: ${item.category || 'N/A'}
+   Description: ${(item as any).description || (item as any).excerpt || 'N/A'}
+   Tags: ${(item as any).tags?.join(', ') || 'None'}
+   Category: ${(item as any).category || 'N/A'}
 `).join('\n')}
 
 Provide:
@@ -232,47 +174,24 @@ export async function suggestThematicConnections(
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.5-flash',
       generationConfig: {
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: 'object',
-          properties: {
-            connections: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  contentId: { type: 'string' },
-                  contentTitle: { type: 'string' },
-                  contentType: { type: 'string' },
-                  connectionStrength: { type: 'number' },
-                  connectionReason: { type: 'string' },
-                  sharedThemes: {
-                    type: 'array',
-                    items: { type: 'string' }
-                  }
-                },
-                required: ['contentId', 'contentTitle', 'contentType', 'connectionStrength', 'connectionReason', 'sharedThemes']
-              }
-            }
-          },
-          required: ['connections']
-        }
+        responseMimeType: 'application/json'
       }
     });
 
+    const sourceAny = sourceContent as any;
     const prompt = `
 Source Content:
-- Type: ${sourceContent.content_type}
+- Type: ${sourceAny.content_type || 'unknown'}
 - Title: ${sourceContent.title}
-- Description: ${sourceContent.description || 'N/A'}
-- Tags: ${sourceContent.tags?.join(', ') || 'None'}
+- Description: ${sourceAny.description || sourceAny.excerpt || 'N/A'}
+- Tags: ${sourceAny.tags?.join(', ') || 'None'}
 
 Target Content Options:
 ${targetContents.map((item: ContentItem, idx: number) => `
 ${idx + 1}. ID: ${item.id}
-   Type: ${item.content_type}
+   Type: ${(item as any).content_type || 'unknown'}
    Title: ${item.title}
-   Description: ${item.description || 'N/A'}
+   Description: ${(item as any).description || (item as any).excerpt || 'N/A'}
    Tags: ${item.tags?.join(', ') || 'None'}
 `).join('\n')}
 

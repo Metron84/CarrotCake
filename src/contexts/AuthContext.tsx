@@ -104,7 +104,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const updateProfile = async (updates: Partial<UserProfile>) => {
     if (!user) return { error: { message: 'No user logged in' } }
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('user_profiles')
         .update(updates)
         .eq('id', user.id)

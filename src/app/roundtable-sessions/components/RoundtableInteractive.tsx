@@ -58,8 +58,9 @@ export default function RoundtableInteractive() {
                           'Milan Kundera', 'Henry Miller', 'Italo Calvino'];
       const thinkerNames = ['Socrates', 'Aristotle', 'Carl Jung', 'Ibn Sina (Avicenna)'];
 
-      const feelerFigures = figuresData?.filter(f => feelerNames.includes(f.name)) || [];
-      const thinkerFigures = figuresData?.filter(f => thinkerNames.includes(f.name)) || [];
+      const typedFigures = (figuresData || []) as HistoricalFigure[];
+      const feelerFigures = typedFigures.filter(f => feelerNames.includes(f.name));
+      const thinkerFigures = typedFigures.filter(f => thinkerNames.includes(f.name));
 
       setFeelers(feelerFigures);
       setThinkers(thinkerFigures);
@@ -116,12 +117,14 @@ export default function RoundtableInteractive() {
         .from('roundtable_sessions')
         .insert({
           title: `Roundtable: ${newTopic}`,
-          topic: newTopic,
+          slug: newTopic.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
           description: `A philosophical discussion on ${newTopic} featuring Feelers and Thinkers`,
-          participants: [...feelers.map(f => f.name), ...thinkers.map(t => t.name)],
-          status: 'draft',
+          session_format: 'discussion' as const,
+          participants: [...feelers.map(f => ({ name: f.name, role: 'feeler' })), ...thinkers.map(t => ({ name: t.name, role: 'thinker' }))] as Array<{ name: string; role: string }>,
+          status: 'draft' as const,
+          tags: [] as string[],
           session_date: new Date().toISOString(),
-        })
+        } as any)
         .select()
         .single();
 

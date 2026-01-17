@@ -1,88 +1,10 @@
 import { supabase } from '../lib/supabase';
+import type { Writing, Ranking, RoundtableSession, ContentStatus, ContentCategory, MediaType, Database } from '@/types/database.types';
 
-// Type definitions matching database schema
-export type ContentStatus = 'draft' | 'published' | 'archived';
-export type ContentCategory = 'philosophy' | 'culture' | 'politics' | 'society' | 'technology' | 'general';
-export type MediaType = 'podcast' | 'video' | 'article' | 'interview';
+// Re-export types for backward compatibility
+export type { ContentStatus, ContentCategory, MediaType, Writing, Ranking, RoundtableSession };
 export type RankingTier = 's_tier' | 'a_tier' | 'b_tier' | 'c_tier' | 'd_tier' | 'f_tier';
-
-export interface Writing {
-  id: string;
-  title: string;
-  subtitle?: string;
-  content: string;
-  excerpt?: string;
-  author: string;
-  category: ContentCategory;
-  status: ContentStatus;
-  tags: string[];
-  read_time?: number;
-  view_count: number;
-  featured: boolean;
-  published_at?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Ranking {
-  id: string;
-  title: string;
-  description: string;
-  category: ContentCategory;
-  methodology?: string;
-  tier: RankingTier;
-  ranking_position: number;
-  subject_name: string;
-  subject_description?: string;
-  rationale: string;
-  status: ContentStatus;
-  tags: string[];
-  view_count: number;
-  published_at?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface RoundtableSession {
-  id: string;
-  title: string;
-  description: string;
-  topic: string;
-  participants: string[];
-  moderator?: string;
-  duration?: number;
-  key_points?: string[];
-  debate_summary?: string;
-  category: ContentCategory;
-  status: ContentStatus;
-  tags: string[];
-  view_count: number;
-  session_date?: string;
-  published_at?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface MediaItem {
-  id: string;
-  title: string;
-  description: string;
-  media_type: MediaType;
-  media_url: string;
-  thumbnail_url?: string;
-  series_name?: string;
-  episode_number?: number;
-  duration?: number;
-  guest_name?: string;
-  category: ContentCategory;
-  status: ContentStatus;
-  tags: string[];
-  view_count: number;
-  play_count: number;
-  published_at?: string;
-  created_at: string;
-  updated_at: string;
-}
+export type MediaItem = Database['public']['Tables']['media_items']['Row'];
 
 export interface ContentStats {
   total_writings: number;
@@ -131,7 +53,7 @@ export const writingsService = {
 
   async create(writing: Partial<Writing>) {
     try {
-      const { data, error } = await supabase.from('writings').insert([writing]).select().single();
+      const { data, error } = await (supabase as any).from('writings').insert([writing]).select().single();
       if (error) throw error;
       return data as Writing;
     } catch (error) {
@@ -142,7 +64,7 @@ export const writingsService = {
 
   async update(id: string, updates: Partial<Writing>) {
     try {
-      const { data, error } = await supabase.from('writings').update(updates).eq('id', id).select().single();
+      const { data, error } = await (supabase as any).from('writings').update(updates).eq('id', id).select().single();
       if (error) throw error;
       return data as Writing;
     } catch (error) {
@@ -200,7 +122,7 @@ export const rankingsService = {
 
   async create(ranking: Partial<Ranking>) {
     try {
-      const { data, error } = await supabase.from('rankings').insert([ranking]).select().single();
+      const { data, error } = await (supabase as any).from('rankings').insert([ranking]).select().single();
       if (error) throw error;
       return data as Ranking;
     } catch (error) {
@@ -211,7 +133,7 @@ export const rankingsService = {
 
   async update(id: string, updates: Partial<Ranking>) {
     try {
-      const { data, error } = await supabase.from('rankings').update(updates).eq('id', id).select().single();
+      const { data, error } = await (supabase as any).from('rankings').update(updates).eq('id', id).select().single();
       if (error) throw error;
       return data as Ranking;
     } catch (error) {
@@ -266,7 +188,7 @@ export const roundtableService = {
 
   async create(session: Partial<RoundtableSession>) {
     try {
-      const { data, error } = await supabase.from('roundtable_sessions').insert([session]).select().single();
+      const { data, error } = await (supabase as any).from('roundtable_sessions').insert([session]).select().single();
       if (error) throw error;
       return data as RoundtableSession;
     } catch (error) {
@@ -277,7 +199,7 @@ export const roundtableService = {
 
   async update(id: string, updates: Partial<RoundtableSession>) {
     try {
-      const { data, error } = await supabase.from('roundtable_sessions').update(updates).eq('id', id).select().single();
+      const { data, error } = await (supabase as any).from('roundtable_sessions').update(updates).eq('id', id).select().single();
       if (error) throw error;
       return data as RoundtableSession;
     } catch (error) {
@@ -335,7 +257,7 @@ export const mediaService = {
 
   async create(item: Partial<MediaItem>) {
     try {
-      const { data, error } = await supabase.from('media_items').insert([item]).select().single();
+      const { data, error } = await (supabase as any).from('media_items').insert([item]).select().single();
       if (error) throw error;
       return data as MediaItem;
     } catch (error) {
@@ -346,7 +268,7 @@ export const mediaService = {
 
   async update(id: string, updates: Partial<MediaItem>) {
     try {
-      const { data, error } = await supabase.from('media_items').update(updates).eq('id', id).select().single();
+      const { data, error } = await (supabase as any).from('media_items').update(updates).eq('id', id).select().single();
       if (error) throw error;
       return data as MediaItem;
     } catch (error) {

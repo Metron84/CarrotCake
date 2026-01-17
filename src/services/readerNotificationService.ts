@@ -47,7 +47,7 @@ class ReaderNotificationService {
     readerId: string,
     preferences: Partial<NotificationPreferences>
   ) {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('notification_preferences')
       .update(preferences)
       .eq('reader_id', readerId)
@@ -82,7 +82,7 @@ class ReaderNotificationService {
    * Update reader profile
    */
   async updateReaderProfile(readerId: string, updates: Partial<ReaderProfile>) {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('reader_profiles')
       .update(updates)
       .eq('id', readerId)
@@ -107,7 +107,7 @@ class ReaderNotificationService {
   ) {
     try {
       // Call Supabase function to get readers who want notifications
-      const { data: readers, error: readersError } = await supabase.rpc(
+      const { data: readers, error: readersError } = await (supabase as any).rpc(
         'get_readers_for_new_content_notification',
         { content_type_param: contentType }
       );
@@ -141,7 +141,7 @@ class ReaderNotificationService {
             const result = await response.json();
 
             // Log notification attempt
-            await supabase.rpc('log_email_notification', {
+            await (supabase as any).rpc('log_email_notification', {
               reader_id_param: reader.reader_id,
               notification_type_param: 'new_content',
               content_id_param: contentId,

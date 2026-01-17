@@ -23,8 +23,7 @@
       "autoprefixer",
       "postcss",
       "eslint",
-      "prettier",
-      "@netlify/plugin-nextjs"
+      "prettier"
     ],
     "scripts": [
       "dev",
@@ -41,7 +40,7 @@
   "scripts": {
     "dev": "next dev -p 4028",
     "build": "next build",
-    "start": "next dev -p 4028",
+    "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,md,json}\"",
@@ -64,7 +63,6 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@netlify/plugin-nextjs": "^5.11.1",
     "@types/bcryptjs": "^3.0.0",
     "@types/node": "^20",
     "@types/react": "^18.3.1",

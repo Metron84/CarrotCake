@@ -53,7 +53,7 @@ export async function fetchComments(status?: CommentStatus): Promise<CommentWith
 
     // Enrich comments with content titles
     const enrichedComments = await Promise.all(
-      (data || []).map(async (comment) => {
+      (data || []).map(async (comment: { content_type?: string; content_id: string; [key: string]: unknown }) => {
         let content_title = 'Unknown Content';
         let content_category = '';
 
@@ -65,8 +65,8 @@ export async function fetchComments(status?: CommentStatus): Promise<CommentWith
               .eq('id', comment.content_id)
               .single();
             if (writing) {
-              content_title = writing.title;
-              content_category = writing.category;
+              content_title = (writing as { title: string; category: string }).title;
+              content_category = (writing as { title: string; category: string }).category;
             }
           } else if (comment.content_type === 'roundtable') {
             const { data: session } = await supabase
@@ -75,8 +75,8 @@ export async function fetchComments(status?: CommentStatus): Promise<CommentWith
               .eq('id', comment.content_id)
               .single();
             if (session) {
-              content_title = session.title;
-              content_category = session.category;
+              content_title = (session as { title: string; category?: string }).title;
+              content_category = (session as { title: string; category?: string }).category || '';
             }
           } else if (comment.content_type === 'ranking') {
             const { data: ranking } = await supabase
@@ -85,8 +85,8 @@ export async function fetchComments(status?: CommentStatus): Promise<CommentWith
               .eq('id', comment.content_id)
               .single();
             if (ranking) {
-              content_title = ranking.title;
-              content_category = ranking.category;
+              content_title = (ranking as { title: string; category?: string }).title;
+              content_category = (ranking as { title: string; category?: string }).category || '';
             }
           } else if (comment.content_type === 'media') {
             const { data: media } = await supabase
@@ -95,8 +95,8 @@ export async function fetchComments(status?: CommentStatus): Promise<CommentWith
               .eq('id', comment.content_id)
               .single();
             if (media) {
-              content_title = media.title;
-              content_category = media.category;
+              content_title = (media as { title: string; category?: string }).title;
+              content_category = (media as { title: string; category?: string }).category || '';
             }
           }
         } catch (error) {
@@ -107,7 +107,7 @@ export async function fetchComments(status?: CommentStatus): Promise<CommentWith
           ...comment,
           content_title,
           content_category,
-        };
+        } as any;
       })
     );
 
@@ -136,9 +136,11 @@ export async function updateCommentStatus(
       .single();
 
     if (fetchError) throw fetchError;
+    
+    const currentStatus = (currentComment as { status?: CommentStatus } | null)?.status || 'pending';
 
     // Update comment status
-    const { error: updateError } = await supabase
+    const { error: updateError } = await (supabase as any)
       .from('comments')
       .update({ status: newStatus })
       .eq('id', commentId);
@@ -147,14 +149,14 @@ export async function updateCommentStatus(
 
     // Record moderation action
     const action: ModerationAction = newStatus === 'approved' ? 'approve' : 'reject';
-    const { error: actionError } = await supabase
+    const { error: actionError } = await (supabase as any)
       .from('comment_moderation_actions')
       .insert({
         comment_id: commentId,
         moderator_id: moderatorId,
         action,
         reason,
-        previous_status: currentComment?.status || 'pending',
+        previous_status: currentStatus,
         new_status: newStatus,
       });
 
@@ -182,7 +184,7 @@ export async function editComment(
 
     if (fetchError) throw fetchError;
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await (supabase as any)
       .from('comments')
       .update({ comment_text: newText })
       .eq('id', commentId);
@@ -190,14 +192,15 @@ export async function editComment(
     if (updateError) throw updateError;
 
     // Record edit action
-    const { error: actionError } = await supabase
+    const editStatus = (currentComment as { status?: CommentStatus } | null)?.status || 'pending';
+    const { error: actionError } = await (supabase as any)
       .from('comment_moderation_actions')
       .insert({
         comment_id: commentId,
         moderator_id: moderatorId,
         action: 'edit',
-        previous_status: currentComment?.status || 'pending',
-        new_status: currentComment?.status || 'pending',
+        previous_status: editStatus,
+        new_status: editStatus,
       });
 
     if (actionError) throw actionError;
